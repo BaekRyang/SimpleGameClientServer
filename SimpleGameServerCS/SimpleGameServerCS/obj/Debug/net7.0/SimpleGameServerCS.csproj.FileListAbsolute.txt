@@ -1,0 +1,17 @@
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\bin\Debug\net7.0\SimpleGameServerCS.exe
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\bin\Debug\net7.0\SimpleGameServerCS.deps.json
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\bin\Debug\net7.0\SimpleGameServerCS.runtimeconfig.json
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\bin\Debug\net7.0\SimpleGameServerCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\bin\Debug\net7.0\SimpleGameServerCS.pdb
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.csproj.AssemblyReference.cache
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.AssemblyInfoInputs.cache
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.AssemblyInfo.cs
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.csproj.CoreCompileInputs.cache
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\refint\SimpleGameServerCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.pdb
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.genruntimeconfig.cache
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\ref\SimpleGameServerCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Github\SimpleGameClientServer\SimpleGameServerCS\SimpleGameServerCS\obj\Debug\net7.0\SimpleGameServerCS.csproj.CopyComplete
