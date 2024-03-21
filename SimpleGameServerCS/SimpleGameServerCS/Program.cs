@@ -27,19 +27,17 @@ class Program
                 while (_validPort is false)
                     _validPort = CheckSetValidPort(_validPort);
             }
-
-            Console.WriteLine("Launch server...");
-            Server.Start(_port);
         }
         else
         {
             Console.WriteLine("Setting file not found.");
-            bool _validPort = false;
-            while (_validPort is false)
-            {
+            bool _validPort                        = false;
+            while (_validPort is false) 
                 _validPort = CheckSetValidPort(_validPort);
-            }
         }
+        
+        Console.WriteLine("Launch server...");
+        Server.Start(_port);
     }
 
     private static bool CheckSetValidPort(bool _validPort)
@@ -56,7 +54,7 @@ class Program
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write($"{_iPort}");
             Console.ResetColor();
-            Console.Write(" Confirm? (Y/N)");
+            Console.Write(".\nConfirm? (Y/N)");
 
             string? _confirm = Console.ReadLine()?.ToUpper();
 
@@ -71,13 +69,14 @@ class Program
 
     private static async Task<bool> WaitInput()
     {
-        int  _waited  = 0;
-        bool _entered = false;
-
-        while (_waited < WAIT_TIME)
+        int  _waitedMs          = 0;
+        bool _entered         = false;
+        DateTime  _lastCheckedTime = DateTime.Now;
+        while (_waitedMs / 1000 < WAIT_TIME)
         {
-            await Task.Delay(1000);
-            _waited++;
+            await Task.Delay(100);
+            _waitedMs          += (DateTime.Now - _lastCheckedTime).Milliseconds;
+            _lastCheckedTime =  DateTime.Now;
 
             if (Console.KeyAvailable)
             {

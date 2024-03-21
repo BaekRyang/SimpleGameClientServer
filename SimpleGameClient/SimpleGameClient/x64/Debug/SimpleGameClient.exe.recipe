@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Github\SimpleGameClient\x64\Debug\SimpleGameClient.exe</FullPath>
+      <FullPath>C:\Github\SimpleGameClientServer\SimpleGameClient\x64\Debug\SimpleGameClient.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
