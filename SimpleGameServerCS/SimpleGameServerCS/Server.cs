@@ -34,6 +34,20 @@ public class Server
 
     private void ReceiveCallback(IAsyncResult _ar)
     {
-        Console.WriteLine($"Received");
+        try
+        {
+            Socket _socket   = (Socket)_ar.AsyncState;
+            int    _received = _socket.EndReceive(_ar);
+            byte[] _dataBuf  = new byte[_received];
+            Array.Copy(new byte[1024], _dataBuf, _received);
+            string _text = Encoding.ASCII.GetString(_dataBuf);
+            Console.WriteLine($"{_socket.RemoteEndPoint}: {_text}");
+            _socket.BeginReceive(new byte[1024], 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 }

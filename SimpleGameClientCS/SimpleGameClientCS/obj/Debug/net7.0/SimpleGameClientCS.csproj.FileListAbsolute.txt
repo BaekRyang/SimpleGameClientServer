@@ -1,0 +1,17 @@
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\bin\Debug\net7.0\SimpleGameClientCS.exe
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\bin\Debug\net7.0\SimpleGameClientCS.deps.json
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\bin\Debug\net7.0\SimpleGameClientCS.runtimeconfig.json
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\bin\Debug\net7.0\SimpleGameClientCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\bin\Debug\net7.0\SimpleGameClientCS.pdb
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.csproj.AssemblyReference.cache
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.AssemblyInfoInputs.cache
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.AssemblyInfo.cs
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.csproj.CoreCompileInputs.cache
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.csproj.CopyComplete
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\refint\SimpleGameClientCS.dll
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.pdb
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\SimpleGameClientCS.genruntimeconfig.cache
+C:\Github\SimpleGameClientServer\SimpleGameClientCS\SimpleGameClientCS\obj\Debug\net7.0\ref\SimpleGameClientCS.dll
