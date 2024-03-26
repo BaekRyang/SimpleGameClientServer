@@ -1,10 +1,12 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
+using SimpleGameClientCS;
 
 class Program
 {
-    private const           int    WAIT_TIME = 3;
+    private const           int    WAIT_TIME = 2;
     private static readonly string Path      = $"{AppDomain.CurrentDomain.BaseDirectory}/Settings.json";
+    private static readonly Client Client    = new();
 
     static void Main(string[] args)
     {
@@ -36,6 +38,7 @@ class Program
         }
 
         Console.WriteLine("Attempt to connect to the server...");
+        Client.Start(_ip, _port);
     }
 
     private static bool CheckSetValidDst(bool _validPort)
@@ -94,11 +97,18 @@ class Program
         int      _waitedMs        = 0;
         bool     _entered         = false;
         DateTime _lastCheckedTime = DateTime.Now;
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Write($"{WAIT_TIME}s left");
+        Console.ForegroundColor = ConsoleColor.Yellow;
         while (_waitedMs / 1000 < WAIT_TIME)
         {
             await Task.Delay(100);
             _waitedMs        += (DateTime.Now - _lastCheckedTime).Milliseconds;
             _lastCheckedTime =  DateTime.Now;
+            Console.SetCursorPosition(0, Console.CursorTop);
+
+            float _remain = WAIT_TIME - _waitedMs / 1000;
+            Console.Write($"{_remain}s left: ");
 
             if (Console.KeyAvailable)
             {
@@ -108,6 +118,9 @@ class Program
                 break;
             }
         }
+
+        Console.ResetColor();
+        Console.WriteLine();
 
         if (_entered)
             return true;
