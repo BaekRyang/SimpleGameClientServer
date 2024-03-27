@@ -8,7 +8,7 @@ class Program
     private static readonly string Path      = $"{AppDomain.CurrentDomain.BaseDirectory}/Settings.json";
     private static readonly Client Client    = new();
 
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         bool _settingExist = LoadSetting(out IPAddress _ip, out int _port);
         StartClient(_ip, _port, _settingExist);

@@ -6,35 +6,60 @@ namespace SimpleGameServerCS;
 
 public class Server
 {
-    private Socket       _listenSocket;
-    private List<Socket> _clientSockets = new();
-    private byte[]       _sendBuffer;
-    private byte[]       _receiveBuffer = new byte[1024];
+    private Socket          _listenSocket;
+    private List<Socket>    _clientSockets = new();
+    private byte[]          _sendBuffer;
+    private byte[]          _receiveBuffer = new byte[1024];
+    private List<IPAddress> _bannedIP      = new();
 
-    public void Start(int _port)
+    public async void Start(int _port)
     {
+        GetBannedIP();
+        await Task.Delay(1000);
         Console.Clear();
-        Console.WriteLine($"\nTotal client : {_clientSockets.Count}");
+        Console.WriteLine($"Banned client : {_bannedIP.Count}" +
+                          $"\nTotal client : {_clientSockets.Count}");
         OpenTCPListener(_port);
         GetChatString();
     }
 
+    private void GetBannedIP()
+    {
+        if (File.Exists("BannedIP.txt") is false)
+            File.Create("BannedIP.txt").Close();
+        
+        string[] _bannedIPs = File.ReadAllLines("BannedIP.txt");
+        foreach (string _IP in _bannedIPs)
+        {
+            Console.WriteLine($"Banned IP : {_IP}");
+            _bannedIP.Add(IPAddress.Parse(_IP));
+        }
+    }
+
     private void GetChatString()
     {
-        string _chatString = Console.ReadLine();
+        while (true)
+        {
+            string _chatString = Console.ReadLine();
 
-        var _cursorTopPos = Console.GetCursorPosition().Top;
-        Console.SetCursorPosition(0, _cursorTopPos - 1);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"Server ({_chatString.Length}) :");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($" {_chatString}");
-        Console.ResetColor();
+            var _cursorTopPos = Console.GetCursorPosition().Top;
+            Console.SetCursorPosition(0, _cursorTopPos - 1);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write($"Server ({_chatString.Length}) :");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($" {_chatString}");
+            Console.ResetColor();
 
-        byte[] _chatData = Encoding.UTF8.GetBytes(_chatString);
+            byte[] _chatData = Encoding.UTF8.GetBytes($"Srv::{_chatString}");
+            BroadcastMessage(_chatData);
+        }
+    }
+
+    private void BroadcastMessage(byte[] _chatData, params Socket[] _excludeSockets)
+    {
         foreach (Socket _socket in _clientSockets)
-            _socket.Send(_chatData);
-        GetChatString();
+            if (_excludeSockets.Contains(_socket) is false)
+                _socket.BeginSend(_chatData, 0, _chatData.Length, SocketFlags.None, _ => { }, _socket);
     }
 
     private void OpenTCPListener(int _port)
@@ -49,10 +74,23 @@ public class Server
     private void AcceptCallback(IAsyncResult _ar)
     {
         Socket _socket = _listenSocket.EndAccept(_ar);
-        _clientSockets.Add(_socket);
-        Console.WriteLine($"New connection in {_socket.RemoteEndPoint}");
-        UpdateClientCount();
-        _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
+
+        if (_bannedIP.Contains((_socket.RemoteEndPoint as IPEndPoint).Address))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Banned client tried to connect from {_socket.RemoteEndPoint}");
+            Console.ResetColor();
+            _socket.Close();
+        }
+        else
+        {
+            _clientSockets.Add(_socket);
+            Console.WriteLine($"New connection in {_socket.RemoteEndPoint}");
+            UpdateClientCount();
+            _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
+        }
+        
+
         _listenSocket.BeginAccept(AcceptCallback, null);
     }
 
@@ -73,6 +111,8 @@ public class Server
 
             string _text = Encoding.UTF8.GetString(_receiveBuffer);
             Console.WriteLine($"{_socket.RemoteEndPoint} ({_received}) : {_text}");
+            
+            BroadcastMessage(Encoding.UTF8.GetBytes($"{_socket.RemoteEndPoint}::{_text}"), _socket);
             Array.Clear(_receiveBuffer, 0, _receiveBuffer.Length);
             _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
         }

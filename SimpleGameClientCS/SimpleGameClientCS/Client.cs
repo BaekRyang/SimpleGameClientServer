@@ -48,16 +48,25 @@ public class Client
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine($"Disconnected from {_socket.RemoteEndPoint}");
                 Console.ResetColor();
+                Program.Main(null);
+                return;
             }
 
             string _sender;
-            if (_socket.RemoteEndPoint.ToString() == _serverIPP.Item1 + ":" + _serverIPP.Item2)
-                _sender = "Server";
-            else
-                _sender = _socket.RemoteEndPoint.ToString();
 
-            string _text = Encoding.UTF8.GetString(_receiveBuffer);
-            Console.WriteLine($"{_sender} ({_received}) : {_text}");
+            (IPAddress, int, string) _receivedData = ParseData(_receiveBuffer);
+            
+            if (_receivedData.Item1 == _serverIPP.Item1 &&
+                _receivedData.Item2 == _serverIPP.Item2)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("Server");
+                Console.ResetColor();
+            }
+            else
+                Console.Write($"{_receivedData.Item1}:{_receivedData.Item2}");
+
+            Console.WriteLine($" ({_receivedData.Item3.Length}) : {_receivedData.Item3}");
             Array.Clear(_receiveBuffer, 0, _receiveBuffer.Length);
             _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
         }
@@ -75,6 +84,27 @@ public class Client
                     break;
             }
         }
+    }
+
+    private (IPAddress, int, string) ParseData(byte[] _bytes)
+    {
+        string _data = Encoding.UTF8.GetString(_bytes);
+
+        string[] _split = _data.Split("::");
+        if (_data.StartsWith("Srv")) 
+            return (_serverIPP.Item1, _serverIPP.Item2, _split[1]);
+
+        string[] _ipPort = _split[0].Split(":");
+
+        try
+        {
+            return (IPAddress.Parse(_ipPort[0]), int.Parse(_ipPort[1]), _split[1]);
+        }
+        catch (Exception e)
+        {
+            return (IPAddress.None, 0, e.Message);
+        }
+        
     }
 
     private void SendCallback(IAsyncResult _ar)
