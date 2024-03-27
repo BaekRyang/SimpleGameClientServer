@@ -59,7 +59,10 @@ public class Server
     {
         foreach (Socket _socket in _clientSockets)
             if (_excludeSockets.Contains(_socket) is false)
+            {
+                Console.WriteLine($"Send to {_socket.RemoteEndPoint} ({_chatData.Length})");
                 _socket.BeginSend(_chatData, 0, _chatData.Length, SocketFlags.None, _ => { }, _socket);
+            }
     }
 
     private void OpenTCPListener(int _port)
@@ -87,7 +90,7 @@ public class Server
             _clientSockets.Add(_socket);
             Console.WriteLine($"New connection in {_socket.RemoteEndPoint}");
             UpdateClientCount();
-            _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
+            _socket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, ReceiveCallback, _socket);
         }
         
 
@@ -109,12 +112,14 @@ public class Server
                 Console.ResetColor();
             }
 
-            string _text = Encoding.UTF8.GetString(_receiveBuffer);
+            string _text = Encoding.UTF8.GetString(_receiveBuffer).TrimEnd('\0');
             Console.WriteLine($"{_socket.RemoteEndPoint} ({_received}) : {_text}");
             
             BroadcastMessage(Encoding.UTF8.GetBytes($"{_socket.RemoteEndPoint}::{_text}"), _socket);
+            var a = $"{_socket.RemoteEndPoint}::{_text}";
+            Console.WriteLine(a.Length);
             Array.Clear(_receiveBuffer, 0, _receiveBuffer.Length);
-            _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
+            _socket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, ReceiveCallback, _socket);
         }
         catch (SocketException _se)
         {

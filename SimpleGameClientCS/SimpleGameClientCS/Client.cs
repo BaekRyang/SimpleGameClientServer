@@ -27,6 +27,27 @@ public class Client
         GetChatString();
     }
 
+    private void SendCallback(IAsyncResult _ar)
+    {
+        Socket _socket = (Socket)_ar.AsyncState;
+        _socket.EndSend(_ar);
+        var _sender = _socket.LocalEndPoint.ToString();
+        
+        var _cursorTopPos = Console.GetCursorPosition().Top;
+        Console.SetCursorPosition(0, _cursorTopPos - 1);
+        
+        if (_sendBuffer.Length == 0) 
+            return;
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.Write($"{_sender} ({_sendBuffer.Length}) :");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($" {Encoding.UTF8.GetString(_sendBuffer)}");
+        Console.ResetColor();
+        
+        Array.Clear(_sendBuffer, 0, _sendBuffer.Length);
+    }
+
     private void ConnectCallback(IAsyncResult _ar)
     {
         Socket _socket = (Socket)_ar.AsyncState;
@@ -51,29 +72,17 @@ public class Client
                 Program.Main(null);
                 return;
             }
-
-            string _sender;
-
-            (IPAddress, int, string) _receivedData = ParseData(_receiveBuffer);
             
-            if (_receivedData.Item1 == _serverIPP.Item1 &&
-                _receivedData.Item2 == _serverIPP.Item2)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("Server");
-                Console.ResetColor();
-            }
-            else
-                Console.Write($"{_receivedData.Item1}:{_receivedData.Item2}");
-
-            Console.WriteLine($" ({_receivedData.Item3.Length}) : {_receivedData.Item3}");
+            ParseData(_receiveBuffer, _received);
+            
             Array.Clear(_receiveBuffer, 0, _receiveBuffer.Length);
-            _socket.BeginReceive(_receiveBuffer, 0, 1024, SocketFlags.None, ReceiveCallback, _socket);
+            _socket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, ReceiveCallback, _socket);
         }
         catch (SocketException _se)
         {
             switch (_se.SocketErrorCode)
             {
+                
                 case SocketError.ConnectionReset:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"ConnectionReset from client {(_ar.AsyncState as Socket).RemoteEndPoint}.");
@@ -86,45 +95,34 @@ public class Client
         }
     }
 
-    private (IPAddress, int, string) ParseData(byte[] _bytes)
+    private void ParseData(byte[] _bytes, int _length)
     {
         string _data = Encoding.UTF8.GetString(_bytes);
 
         string[] _split = _data.Split("::");
-        if (_data.StartsWith("Srv")) 
-            return (_serverIPP.Item1, _serverIPP.Item2, _split[1]);
+        if (_data.StartsWith("Srv"))
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Server");
+            Console.ResetColor();
+            Console.WriteLine($" ({_length}) : {_split[1]}");
+            return;
+        }
 
         string[] _ipPort = _split[0].Split(":");
 
         try
         {
-            return (IPAddress.Parse(_ipPort[0]), int.Parse(_ipPort[1]), _split[1]);
+            (IPAddress, int, string) _result = (IPAddress.Parse(_ipPort[0]), int.Parse(_ipPort[1]), _split[1]);
+            Console.Write($"{_result.Item1}:{_result.Item2}");
+            Console.WriteLine($" ({_length}) : {_result.Item3}");
         }
         catch (Exception e)
         {
-            return (IPAddress.None, 0, e.Message);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error : {_socket.RemoteEndPoint}");
+            Console.ResetColor();
         }
         
-    }
-
-    private void SendCallback(IAsyncResult _ar)
-    {
-        Socket _socket = (Socket)_ar.AsyncState;
-        _socket.EndSend(_ar);
-        var    _sender = _socket.LocalEndPoint.ToString();
-        
-        var _cursorTopPos = Console.GetCursorPosition().Top;
-        Console.SetCursorPosition(0, _cursorTopPos - 1);
-        
-        if (_sendBuffer.Length == 0) 
-            return;
-
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.Write($"{_sender} ({_sendBuffer.Length}) :");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($" {Encoding.UTF8.GetString(_sendBuffer)}");
-        Console.ResetColor();
-        
-        Array.Clear(_sendBuffer, 0, _sendBuffer.Length);
     }
 }
