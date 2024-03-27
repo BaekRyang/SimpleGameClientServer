@@ -27,7 +27,7 @@ public class Server
     {
         if (File.Exists("BannedIP.txt") is false)
             File.Create("BannedIP.txt").Close();
-        
+
         string[] _bannedIPs = File.ReadAllLines("BannedIP.txt");
         foreach (string _IP in _bannedIPs)
         {
@@ -45,13 +45,118 @@ public class Server
             var _cursorTopPos = Console.GetCursorPosition().Top;
             Console.SetCursorPosition(0, _cursorTopPos - 1);
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write($"Server ({_chatString.Length}) :");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($" {_chatString}");
-            Console.ResetColor();
 
-            byte[] _chatData = Encoding.UTF8.GetBytes($"Srv::{_chatString}");
-            BroadcastMessage(_chatData);
+            if (_chatString.StartsWith('/'))
+                ProcessCommand(_chatString);
+            else
+            {
+                Console.Write($"Server ({_chatString.Length}) :");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($" {_chatString}");
+                Console.ResetColor();
+                byte[] _chatData = Encoding.UTF8.GetBytes($"Srv::{_chatString}");
+                BroadcastMessage(_chatData);
+            }
+        }
+    }
+
+    private void ProcessCommand(string _chatString)
+    {
+        Console.WriteLine();
+        string[]  _split = _chatString.Split(' ');
+        switch (_split[0])
+        {
+            case "/ban":
+                if (_split.Length < 2)
+                {
+                    Console.WriteLine("Usage : /ban [IP]");
+                    return;
+                }
+
+                if (IPAddress.TryParse(_split[1], out IPAddress _ip) is false)
+                {
+                    Console.WriteLine("Invalid IP address.");
+                    return;
+                }
+
+                if (_bannedIP.Contains(_ip))
+                {
+                    Console.WriteLine("Already banned.");
+                    return;
+                }
+
+                _bannedIP.Add(_ip);
+                File.AppendAllText("BannedIP.txt", $"{_ip}\n");
+                Console.WriteLine($"Banned {_ip}");
+                
+                foreach (Socket _socket in _clientSockets)
+                    if ((_socket.RemoteEndPoint as IPEndPoint).Address.Equals(_ip))
+                    {
+                        var _msg = "Srv::You are banned."u8.ToArray();
+                        _socket.Send(_msg);
+                        
+                        var _broadcastMsg = Encoding.UTF8.GetBytes($"Srv::{_socket.RemoteEndPoint} has been banned.");
+                        BroadcastMessage(_broadcastMsg, _socket);
+                        _clientSockets.Remove(_socket);
+                        UpdateClientCount();
+                        _socket.Close();
+                        break;
+                    }
+                break;
+            case "/unban":
+                if (_split.Length < 2)
+                {
+                    Console.WriteLine("Usage : /unban [IP]\n" +
+                                      "        /unban [Index]");
+                    return;
+                }
+                IPAddress _ip2 = IPAddress.None;
+                if (_split[1].Split('.').Length == 4)
+                {
+                    if (IPAddress.TryParse(_split[1], out _ip2) is false)
+                    {
+                        Console.WriteLine("Invalid IP address.");
+                        return;
+                    }
+                    
+                    if (_bannedIP.Contains(_ip2) is false)
+                    {
+                        Console.WriteLine("Not banned.");
+                        return;
+                    }
+                }
+                else
+                {
+                    if (int.TryParse(_split[1], out int _index) &&
+                        _index >= 1 && _index < _bannedIP.Count + 1)
+                        _ip2 = _bannedIP[_index - 1];
+                    else
+                    {
+                        Console.WriteLine("Invalid index.");
+                        return;
+                    }
+                }
+
+                _bannedIP.Remove(_ip2);
+                File.WriteAllLines("BannedIP.txt", _bannedIP.Select(_ => _.ToString()));
+                Console.WriteLine($"Unbanned {_ip2}");
+                break;
+            case "/ban-list":
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("Banned IP list :");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                for (int _i = 0; _i < _bannedIP.Count; _i++)
+                {
+                    IPAddress _ip3 = _bannedIP[_i];
+                    Console.WriteLine($" {_i + 1 + ".",-3} {_ip3}");
+                }
+
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("End of list.");
+                break;
+            default:
+                Console.WriteLine("Unknown command.");
+                break;
         }
     }
 
@@ -59,10 +164,7 @@ public class Server
     {
         foreach (Socket _socket in _clientSockets)
             if (_excludeSockets.Contains(_socket) is false)
-            {
-                Console.WriteLine($"Send to {_socket.RemoteEndPoint} ({_chatData.Length})");
                 _socket.BeginSend(_chatData, 0, _chatData.Length, SocketFlags.None, _ => { }, _socket);
-            }
     }
 
     private void OpenTCPListener(int _port)
@@ -83,6 +185,9 @@ public class Server
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Banned client tried to connect from {_socket.RemoteEndPoint}");
             Console.ResetColor();
+            
+            var _msg = "Srv::You are banned."u8.ToArray();
+            _socket.BeginSend(_msg, 0, _msg.Length, SocketFlags.None, _ => { }, _socket);
             _socket.Close();
         }
         else
@@ -92,7 +197,6 @@ public class Server
             UpdateClientCount();
             _socket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, ReceiveCallback, _socket);
         }
-        
 
         _listenSocket.BeginAccept(AcceptCallback, null);
     }
@@ -114,10 +218,8 @@ public class Server
 
             string _text = Encoding.UTF8.GetString(_receiveBuffer).TrimEnd('\0');
             Console.WriteLine($"{_socket.RemoteEndPoint} ({_received}) : {_text}");
-            
+
             BroadcastMessage(Encoding.UTF8.GetBytes($"{_socket.RemoteEndPoint}::{_text}"), _socket);
-            var a = $"{_socket.RemoteEndPoint}::{_text}";
-            Console.WriteLine(a.Length);
             Array.Clear(_receiveBuffer, 0, _receiveBuffer.Length);
             _socket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, ReceiveCallback, _socket);
         }
@@ -138,6 +240,9 @@ public class Server
                 case SocketError.SocketError:
                 case SocketError.Success:
                 case SocketError.OperationAborted:
+                    _clientSockets.Remove((_ar.AsyncState as Socket)!);
+                    UpdateClientCount();
+                    break;
                 case SocketError.IOPending:
                 case SocketError.Interrupted:
                 case SocketError.AccessDenied:

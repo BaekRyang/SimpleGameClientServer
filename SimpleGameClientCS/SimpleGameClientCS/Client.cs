@@ -73,7 +73,9 @@ public class Client
                 return;
             }
             
-            ParseData(_receiveBuffer, _received);
+            byte[] _receiveData = new byte[_received];
+            Array.Copy(_receiveBuffer, _receiveData, _received);
+            ParseData(_receiveData);
             
             Array.Clear(_receiveBuffer, 0, _receiveBuffer.Length);
             _socket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, ReceiveCallback, _socket);
@@ -95,17 +97,18 @@ public class Client
         }
     }
 
-    private void ParseData(byte[] _bytes, int _length)
+    private void ParseData(byte[] _bytes)
     {
         string _data = Encoding.UTF8.GetString(_bytes);
 
-        string[] _split = _data.Split("::");
+        string[] _split       = _data.Split("::");
+        int      _chatSize = _bytes.Length - _split[0].Length - 2;
         if (_data.StartsWith("Srv"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Write("Server");
             Console.ResetColor();
-            Console.WriteLine($" ({_length}) : {_split[1]}");
+            Console.WriteLine($" ({_chatSize}) : {_split[1]}");
             return;
         }
 
@@ -115,7 +118,7 @@ public class Client
         {
             (IPAddress, int, string) _result = (IPAddress.Parse(_ipPort[0]), int.Parse(_ipPort[1]), _split[1]);
             Console.Write($"{_result.Item1}:{_result.Item2}");
-            Console.WriteLine($" ({_length}) : {_result.Item3}");
+            Console.WriteLine($" ({_chatSize}) : {_result.Item3}");
         }
         catch (Exception e)
         {
